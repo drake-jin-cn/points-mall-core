@@ -13,12 +13,18 @@
 - **Read/Write Separation (simulated)** — dual `DataSource` config routing write ops to primary DSN, reads to replica DSN
 - **Redis Cache** — cache-aside for hot queries (employee balance, product list); full three-layer defense: null caching / distributed lock / TTL jitter
 
+## Why This Tech Stack
+
+Spring Boot 4 (Java 25) is the choice for the service that carries the heaviest business logic: the points ledger, attendance rules, and employee hierarchy. The Spring ecosystem's maturity means every concern — transactions, scheduling, caching, data access — has a well-tested, production-proven solution. Java 25 is the latest LTS (released September 2025), and Spring Boot 4.x is specifically designed for Java 21+, making this the correct modern pairing.
+
+The combination also enables the most interview-relevant Java talking points: Virtual Threads (Project Loom) for high-concurrency scenarios, and Spring Data JPA with Flyway for disciplined schema evolution.
+
 ## Tech Stack
 
 | Layer | Technology |
 |-------|------------|
-| Framework | Java 17, Spring Boot 3.x |
-| Database | PostgreSQL 15 + Spring Data JPA (Hibernate) |
+| Framework | Java 25, Spring Boot 4.1 |
+| Database | PostgreSQL 15 + Spring Data JPA (Hibernate 7) |
 | Cache | Redis + Redisson (distributed lock for cache breakdown) |
 | Scheduler | Spring `@Scheduled` (no external job framework) |
 | Migration | Flyway |
