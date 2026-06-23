@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: points-mall-core
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   # Disable Spring Boot Actuator auto-configuration; health is handled by custom endpoint
   autoconfigure:
     exclude:
