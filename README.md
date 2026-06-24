@@ -31,6 +31,13 @@ The combination also enables the most interview-relevant Java talking points: Vi
 | Build | Maven |
 | Docs | SpringDoc OpenAPI (`/v3/api-docs`) |
 
+## Docker
+
+```bash
+docker build -t points-mall-core .
+docker run --env-file .env -p 8080:8080 points-mall-core
+```
+
 ## Local Development
 
 ```bash
@@ -48,6 +55,15 @@ SPRING_REDIS_HOST=localhost
 SPRING_REDIS_PORT=6379
 JWT_SECRET=your-secret
 ```
+
+## Code Quality
+
+```bash
+mvn spotless:check  # Check formatting (google-java-format)
+mvn spotless:apply  # Auto-fix formatting
+```
+
+Formatting runs automatically on staged `.java` files via the pre-commit hook. CI (`mvn verify`) runs on every PR via `.github/workflows/ci.yml` in this repository.
 
 ## Database Ownership
 
