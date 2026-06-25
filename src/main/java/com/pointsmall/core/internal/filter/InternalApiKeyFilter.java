@@ -1,5 +1,6 @@
 package com.pointsmall.core.internal.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pointsmall.core.common.ApiResponse;
 import com.pointsmall.core.common.exception.CoreErrorCode;
 import jakarta.servlet.FilterChain;
@@ -13,7 +14,6 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.filter.OncePerRequestFilter;
-import tools.jackson.databind.ObjectMapper;
 
 public class InternalApiKeyFilter extends OncePerRequestFilter {
 
