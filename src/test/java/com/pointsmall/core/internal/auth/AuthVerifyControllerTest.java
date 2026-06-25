@@ -22,13 +22,10 @@ import tools.jackson.databind.ObjectMapper;
 @Sql(
     scripts = {"/db/seed-roles.sql", "/db/seed-test-employee.sql"},
     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
-@Sql(
-    scripts = "/db/cleanup-test-employee.sql",
-    executionPhase = Sql.ExecutionPhase.AFTER_TEST_CLASS)
 class AuthVerifyControllerTest {
 
   private static final String VERIFY_URL = "/internal/auth/verify";
-  private static final String INTERNAL_API_KEY_HEADER = "X-Internal-Api-Key";
+  private static final String INTERNAL_API_KEY_HEADER = "INTERNAL_API_KEY";
   private static final String INTERNAL_API_KEY = "test-internal-key-for-tests";
 
   @Autowired private AuthVerifyController authVerifyController;
@@ -59,7 +56,34 @@ class AuthVerifyControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.code").value("OK"))
         .andExpect(jsonPath("$.data.email").value("test@example.com"))
-        .andExpect(jsonPath("$.data.isActive").value(true));
+        .andExpect(jsonPath("$.data.isActive").value(true))
+        .andExpect(jsonPath("$.data.roles[0]").value("EMPLOYEE"))
+        .andExpect(jsonPath("$.traceId").doesNotExist());
+  }
+
+  @Test
+  void verify_validApiKey_passesFilter_returns200() throws Exception {
+    MockMvc filteredMockMvc =
+        MockMvcBuilders.standaloneSetup(authVerifyController)
+            .setControllerAdvice(new GlobalExceptionHandler())
+            .addFilters(new InternalApiKeyFilter(new ObjectMapper(), INTERNAL_API_KEY))
+            .build();
+
+    filteredMockMvc
+        .perform(
+            post(VERIFY_URL)
+                .header(INTERNAL_API_KEY_HEADER, INTERNAL_API_KEY)
+                .contentType(APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "email": "test@example.com",
+                      "password": "password123"
+                    }
+                    """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.code").value("OK"))
+        .andExpect(jsonPath("$.traceId").doesNotExist());
   }
 
   @Test
@@ -76,7 +100,9 @@ class AuthVerifyControllerTest {
                     }
                     """))
         .andExpect(status().isUnauthorized())
-        .andExpect(jsonPath("$.code").value("core-1001"));
+        .andExpect(jsonPath("$.code").value("core-1001"))
+        .andExpect(jsonPath("$.message").value("Invalid credentials"))
+        .andExpect(jsonPath("$.traceId").isNotEmpty());
   }
 
   @Test
@@ -93,7 +119,27 @@ class AuthVerifyControllerTest {
                     }
                     """))
         .andExpect(status().isUnauthorized())
-        .andExpect(jsonPath("$.code").value("core-1001"));
+        .andExpect(jsonPath("$.code").value("core-1001"))
+        .andExpect(jsonPath("$.message").value("Invalid credentials"))
+        .andExpect(jsonPath("$.traceId").isNotEmpty());
+  }
+
+  @Test
+  void verify_disabledAccount_returns403() throws Exception {
+    mockMvc
+        .perform(
+            post(VERIFY_URL)
+                .contentType(APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "email": "inactive@example.com",
+                      "password": "password123"
+                    }
+                    """))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code").value("core-1002"))
+        .andExpect(jsonPath("$.traceId").isNotEmpty());
   }
 
   @Test
@@ -110,7 +156,8 @@ class AuthVerifyControllerTest {
                     }
                     """))
         .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.code").value("core-1010"));
+        .andExpect(jsonPath("$.code").value("core-1010"))
+        .andExpect(jsonPath("$.traceId").isNotEmpty());
   }
 
   @Test
@@ -133,6 +180,7 @@ class AuthVerifyControllerTest {
                     }
                     """))
         .andExpect(status().isUnauthorized())
-        .andExpect(jsonPath("$.code").value("core-1003"));
+        .andExpect(jsonPath("$.code").value("core-1003"))
+        .andExpect(jsonPath("$.traceId").isNotEmpty());
   }
 }
