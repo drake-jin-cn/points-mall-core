@@ -4,7 +4,7 @@ public enum CoreErrorCode {
   // ── Auth ──────────────────────────────────────────────────────────────────
   INVALID_CREDENTIALS("core-1001", "Invalid credentials"),
   ACCOUNT_DISABLED("core-1002", "Account disabled"),
-  UNAUTHORIZED_CALLER("core-1003", "Missing or invalid API key"),
+  UNAUTHORIZED_CALLER("core-1003", "Unauthorized caller"),
 
   // ── Validation ────────────────────────────────────────────────────────────
   VALIDATION_FAILED("core-1010", "Request validation failed"),
