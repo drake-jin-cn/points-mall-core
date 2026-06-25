@@ -1,5 +1,6 @@
 package com.pointsmall.core.internal.auth.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 public class VerifyResponse {
@@ -7,7 +8,10 @@ public class VerifyResponse {
   private Long id;
   private String name;
   private String email;
+
+  @JsonProperty("isActive")
   private boolean isActive;
+
   private List<String> roles;
 
   public VerifyResponse(Long id, String name, String email, boolean isActive, List<String> roles) {
