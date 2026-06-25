@@ -1,3 +1,6 @@
+internal:
+  api-key: ${INTERNAL_API_KEY}    # no default — application fails to start if unset
+
 server:
   port: ${PORT:8080}
 
