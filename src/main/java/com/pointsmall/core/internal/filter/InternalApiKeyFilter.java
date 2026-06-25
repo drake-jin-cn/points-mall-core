@@ -7,28 +7,30 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import tools.jackson.databind.ObjectMapper;
 
-@Component
 public class InternalApiKeyFilter extends OncePerRequestFilter {
 
   private static final Logger log = LoggerFactory.getLogger(InternalApiKeyFilter.class);
-  private static final String INTERNAL_PREFIX = "/internal/";
-  private static final String INTERNAL_API_KEY_HEADER = "X-Internal-Api-Key";
+  private static final String INTERNAL_API_KEY_HEADER = "INTERNAL_API_KEY";
 
   private final ObjectMapper objectMapper;
   private final String internalApiKey;
 
-  public InternalApiKeyFilter(
-      ObjectMapper objectMapper, @Value("${internal.api-key}") String internalApiKey) {
+  public InternalApiKeyFilter(ObjectMapper objectMapper, String internalApiKey) {
     this.objectMapper = objectMapper;
     this.internalApiKey = internalApiKey;
+  }
+
+  @Override
+  protected boolean shouldNotFilter(HttpServletRequest request) {
+    return !request.getRequestURI().startsWith("/internal/");
   }
 
   @Override
@@ -36,14 +38,13 @@ public class InternalApiKeyFilter extends OncePerRequestFilter {
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
     try {
-      String requestUri = request.getRequestURI();
-      if (!requestUri.startsWith(INTERNAL_PREFIX)) {
-        filterChain.doFilter(request, response);
-        return;
-      }
-
       String requestApiKey = request.getHeader(INTERNAL_API_KEY_HEADER);
-      if (requestApiKey == null || !requestApiKey.equals(internalApiKey)) {
+      boolean keyValid =
+          requestApiKey != null
+              && MessageDigest.isEqual(
+                  internalApiKey.getBytes(StandardCharsets.UTF_8),
+                  requestApiKey.getBytes(StandardCharsets.UTF_8));
+      if (!keyValid) {
         log.warn(
             "Rejected /internal request from {} - missing or invalid API key",
             request.getRemoteAddr());
@@ -52,7 +53,7 @@ public class InternalApiKeyFilter extends OncePerRequestFilter {
             HttpServletResponse.SC_UNAUTHORIZED,
             ApiResponse.error(
                 CoreErrorCode.UNAUTHORIZED_CALLER.getCode(),
-                "Unauthorized caller",
+                CoreErrorCode.UNAUTHORIZED_CALLER.getMessage(),
                 UUID.randomUUID().toString()));
         return;
       }

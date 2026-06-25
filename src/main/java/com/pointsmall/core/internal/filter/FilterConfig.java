@@ -1,17 +1,21 @@
 package com.pointsmall.core.internal.filter;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import tools.jackson.databind.ObjectMapper;
 
 @Configuration
 public class FilterConfig {
 
   @Bean
   public FilterRegistrationBean<InternalApiKeyFilter> internalApiKeyFilterRegistration(
-      InternalApiKeyFilter filter) {
-    FilterRegistrationBean<InternalApiKeyFilter> reg = new FilterRegistrationBean<>(filter);
+      ObjectMapper objectMapper, @Value("${internal.api-key}") String apiKey) {
+    FilterRegistrationBean<InternalApiKeyFilter> reg =
+        new FilterRegistrationBean<>(new InternalApiKeyFilter(objectMapper, apiKey));
     reg.addUrlPatterns("/internal/*");
+    reg.setOrder(1);
     return reg;
   }
 }

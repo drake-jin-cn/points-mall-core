@@ -19,7 +19,7 @@ class InternalApiKeyFilterTest {
   @Test
   void validKey_shouldPassThrough() throws Exception {
     MockHttpServletRequest request = new MockHttpServletRequest("GET", "/internal/auth/verify");
-    request.addHeader("X-Internal-Api-Key", "test-key");
+    request.addHeader("INTERNAL_API_KEY", "test-key");
     MockHttpServletResponse response = new MockHttpServletResponse();
     MockFilterChain filterChain = new MockFilterChain();
 
@@ -41,14 +41,15 @@ class InternalApiKeyFilterTest {
     assertThat(response.getStatus()).isEqualTo(401);
     assertThat(response.getContentType()).isEqualTo("application/json; charset=UTF-8");
     assertThat(response.getContentAsString()).contains("\"core-1003\"");
-    assertThat(response.getContentAsString()).contains("\"Unauthorized caller\"");
+    assertThat(response.getContentAsString()).contains("\"Missing or invalid API key\"");
+    assertThat(response.getContentAsString()).contains("\"traceId\"");
     assertThat(filterChain.getRequest()).isNull();
   }
 
   @Test
   void wrongKey_shouldReturn401() throws Exception {
     MockHttpServletRequest request = new MockHttpServletRequest("GET", "/internal/auth/verify");
-    request.addHeader("X-Internal-Api-Key", "wrong-key");
+    request.addHeader("INTERNAL_API_KEY", "wrong-key");
     MockHttpServletResponse response = new MockHttpServletResponse();
     MockFilterChain filterChain = new MockFilterChain();
 
@@ -56,7 +57,8 @@ class InternalApiKeyFilterTest {
 
     assertThat(response.getStatus()).isEqualTo(401);
     assertThat(response.getContentAsString()).contains("\"core-1003\"");
-    assertThat(response.getContentAsString()).contains("\"Unauthorized caller\"");
+    assertThat(response.getContentAsString()).contains("\"Missing or invalid API key\"");
+    assertThat(response.getContentAsString()).contains("\"traceId\"");
     assertThat(filterChain.getRequest()).isNull();
   }
 
