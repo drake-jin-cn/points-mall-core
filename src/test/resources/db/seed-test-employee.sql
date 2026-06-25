@@ -3,7 +3,7 @@ VALUES (
   100,
   'Test User',
   'test@example.com',
-  '$2a$04$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
+  '$2a$04$3VsQDAD7ersdrBAHSOXdo.JnNo695.rnQePyOkl0RhFXb.PpZvr3a',
   true,
   NOW(),
   NOW()

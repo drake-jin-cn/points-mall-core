@@ -5,16 +5,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.pointsmall.core.common.exception.GlobalExceptionHandler;
+import com.pointsmall.core.internal.filter.InternalApiKeyFilter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Sql(
     scripts = {"/db/seed-roles.sql", "/db/seed-test-employee.sql"},
@@ -28,20 +31,29 @@ class AuthVerifyControllerTest {
   private static final String INTERNAL_API_KEY_HEADER = "X-Internal-Api-Key";
   private static final String INTERNAL_API_KEY = "test-internal-key-for-tests";
 
-  @Autowired private MockMvc mockMvc;
+  @Autowired private AuthVerifyController authVerifyController;
+
+  private MockMvc mockMvc;
+
+  @BeforeEach
+  void setUp() {
+    mockMvc =
+        MockMvcBuilders.standaloneSetup(authVerifyController)
+            .setControllerAdvice(new GlobalExceptionHandler())
+            .build();
+  }
 
   @Test
   void verify_validCredentials_returns200() throws Exception {
     mockMvc
         .perform(
             post(VERIFY_URL)
-                .header(INTERNAL_API_KEY_HEADER, INTERNAL_API_KEY)
                 .contentType(APPLICATION_JSON)
                 .content(
                     """
                     {
                       "email": "test@example.com",
-                      "password": "password"
+                      "password": "password123"
                     }
                     """))
         .andExpect(status().isOk())
@@ -55,7 +67,6 @@ class AuthVerifyControllerTest {
     mockMvc
         .perform(
             post(VERIFY_URL)
-                .header(INTERNAL_API_KEY_HEADER, INTERNAL_API_KEY)
                 .contentType(APPLICATION_JSON)
                 .content(
                     """
@@ -73,13 +84,12 @@ class AuthVerifyControllerTest {
     mockMvc
         .perform(
             post(VERIFY_URL)
-                .header(INTERNAL_API_KEY_HEADER, INTERNAL_API_KEY)
                 .contentType(APPLICATION_JSON)
                 .content(
                     """
                     {
                       "email": "unknown@example.com",
-                      "password": "password"
+                      "password": "password123"
                     }
                     """))
         .andExpect(status().isUnauthorized())
@@ -91,13 +101,12 @@ class AuthVerifyControllerTest {
     mockMvc
         .perform(
             post(VERIFY_URL)
-                .header(INTERNAL_API_KEY_HEADER, INTERNAL_API_KEY)
                 .contentType(APPLICATION_JSON)
                 .content(
                     """
                     {
                       "email": "not-an-email",
-                      "password": "password"
+                      "password": "password123"
                     }
                     """))
         .andExpect(status().isBadRequest())
@@ -106,7 +115,13 @@ class AuthVerifyControllerTest {
 
   @Test
   void verify_missingApiKey_returns401() throws Exception {
-    mockMvc
+    MockMvc filteredMockMvc =
+        MockMvcBuilders.standaloneSetup(authVerifyController)
+            .setControllerAdvice(new GlobalExceptionHandler())
+            .addFilters(new InternalApiKeyFilter(new ObjectMapper(), INTERNAL_API_KEY))
+            .build();
+
+    filteredMockMvc
         .perform(
             post(VERIFY_URL)
                 .contentType(APPLICATION_JSON)
@@ -114,7 +129,7 @@ class AuthVerifyControllerTest {
                     """
                     {
                       "email": "test@example.com",
-                      "password": "password"
+                      "password": "password123"
                     }
                     """))
         .andExpect(status().isUnauthorized())

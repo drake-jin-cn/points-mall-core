@@ -5,6 +5,7 @@ import com.pointsmall.core.common.exception.CoreErrorCode;
 import com.pointsmall.core.employee.Employee;
 import com.pointsmall.core.employee.EmployeeRepository;
 import com.pointsmall.core.employee.Role;
+import com.pointsmall.core.internal.auth.dto.VerifyRequest;
 import com.pointsmall.core.internal.auth.dto.VerifyResponse;
 import java.util.List;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -18,6 +19,10 @@ public class EmployeeAuthService {
 
   public EmployeeAuthService(EmployeeRepository employeeRepository) {
     this.employeeRepository = employeeRepository;
+  }
+
+  public VerifyResponse verify(VerifyRequest request) {
+    return verify(request.getEmail(), request.getPassword());
   }
 
   public VerifyResponse verify(String email, String password) {
