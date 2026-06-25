@@ -40,6 +40,12 @@
       <scope>runtime</scope>
     </dependency>
 
+    <!-- BCrypt — spring-security-crypto only; no full Security auto-configuration -->
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-crypto</artifactId>
+    </dependency>
+
     <!-- Flyway: Spring Boot 4.x uses a dedicated module (no longer in spring-boot-autoconfigure) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
