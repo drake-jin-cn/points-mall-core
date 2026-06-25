@@ -51,8 +51,9 @@ public class Employee {
 
   @PrePersist
   void prePersist() {
-    createdAt = OffsetDateTime.now();
-    updatedAt = OffsetDateTime.now();
+    OffsetDateTime now = OffsetDateTime.now();
+    createdAt = now;
+    updatedAt = now;
   }
 
   @PreUpdate
@@ -102,5 +103,17 @@ public class Employee {
 
   public void setRoles(Set<Role> roles) {
     this.roles = roles;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Employee other)) return false;
+    return id != null && id.equals(other.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return getClass().hashCode();
   }
 }
