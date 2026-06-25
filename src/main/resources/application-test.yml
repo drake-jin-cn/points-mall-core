@@ -1,15 +1,19 @@
+internal:
+  api-key: test-internal-key-for-tests
+
 spring:
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:points_core_test}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:}
     driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: false    # schema managed by Hibernate create-drop in tests
   jpa:
     hibernate:
       ddl-auto: create-drop
     show-sql: false
     open-in-view: false
-
   data:
     redis:
       host: ${REDIS_HOST:localhost}

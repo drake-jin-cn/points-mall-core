@@ -27,6 +27,11 @@
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+
     <!-- JPA / Hibernate -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -38,6 +43,12 @@
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <scope>runtime</scope>
+    </dependency>
+
+    <!-- BCrypt — spring-security-crypto only; no full Security auto-configuration -->
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-crypto</artifactId>
     </dependency>
 
     <!-- Flyway: Spring Boot 4.x uses a dedicated module (no longer in spring-boot-autoconfigure) -->
@@ -71,7 +82,7 @@
         <configuration>
           <java>
             <googleJavaFormat>
-              <version>1.22.0</version>
+              <version>1.28.0</version>
               <style>GOOGLE</style>
             </googleJavaFormat>
             <removeUnusedImports/>
