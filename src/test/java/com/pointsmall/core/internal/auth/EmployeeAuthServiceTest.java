@@ -34,7 +34,7 @@ class EmployeeAuthServiceTest {
 
   @BeforeEach
   void setUp() {
-    service = new EmployeeAuthService(employeeRepository);
+    service = new EmployeeAuthService(employeeRepository, encoder);
   }
 
   @Test

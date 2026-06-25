@@ -15,10 +15,12 @@ import org.springframework.stereotype.Service;
 public class EmployeeAuthService {
 
   private final EmployeeRepository employeeRepository;
-  private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
+  private final BCryptPasswordEncoder passwordEncoder;
 
-  public EmployeeAuthService(EmployeeRepository employeeRepository) {
+  public EmployeeAuthService(
+      EmployeeRepository employeeRepository, BCryptPasswordEncoder passwordEncoder) {
     this.employeeRepository = employeeRepository;
+    this.passwordEncoder = passwordEncoder;
   }
 
   public VerifyResponse verify(VerifyRequest request) {
