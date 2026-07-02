@@ -33,7 +33,8 @@ public class EmployeeAuthService {
             .findByEmail(email)
             .orElseThrow(() -> new BusinessException(CoreErrorCode.INVALID_CREDENTIALS));
 
-    if (!passwordEncoder.matches(password, employee.getPasswordHash())) {
+    String passwordHash = employee.getPasswordHash();
+    if (passwordHash == null || !passwordEncoder.matches(password, passwordHash)) {
       throw new BusinessException(CoreErrorCode.INVALID_CREDENTIALS);
     }
 

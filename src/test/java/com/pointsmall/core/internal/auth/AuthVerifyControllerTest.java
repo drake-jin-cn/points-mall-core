@@ -6,7 +6,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.pointsmall.core.common.exception.GlobalExceptionHandler;
+import com.pointsmall.core.employee.Employee;
+import com.pointsmall.core.employee.EmployeeRepository;
+import com.pointsmall.core.employee.RoleRepository;
 import com.pointsmall.core.internal.filter.InternalApiKeyFilter;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +33,8 @@ class AuthVerifyControllerTest {
   private static final String INTERNAL_API_KEY = "test-internal-key-for-tests";
 
   @Autowired private AuthVerifyController authVerifyController;
+  @Autowired private EmployeeRepository employeeRepository;
+  @Autowired private RoleRepository roleRepository;
 
   private MockMvc mockMvc;
 
@@ -139,6 +145,33 @@ class AuthVerifyControllerTest {
                     """))
         .andExpect(status().isForbidden())
         .andExpect(jsonPath("$.code").value("core-1002"))
+        .andExpect(jsonPath("$.traceId").isNotEmpty());
+  }
+
+  @Test
+  void verify_nullPasswordHash_returns401() throws Exception {
+    Employee employee = new Employee();
+    employee.setName("Github Employee");
+    employee.setEmail("github-only@example.com");
+    employee.setPasswordHash(null);
+    employee.setActive(true);
+    employee.setRoles(Set.of(roleRepository.findByName("EMPLOYEE").orElseThrow()));
+    employeeRepository.save(employee);
+
+    mockMvc
+        .perform(
+            post(VERIFY_URL)
+                .contentType(APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "email": "github-only@example.com",
+                      "password": "password123"
+                    }
+                    """))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.code").value("core-1001"))
+        .andExpect(jsonPath("$.message").value("Invalid credentials"))
         .andExpect(jsonPath("$.traceId").isNotEmpty());
   }
 

@@ -30,8 +30,14 @@ public class Employee {
   @Column(nullable = false, unique = true, length = 255)
   private String email;
 
-  @Column(name = "password_hash", nullable = false, length = 255)
+  @Column(name = "password_hash", nullable = true, length = 255)
   private String passwordHash;
+
+  @Column(name = "github_id", unique = true, length = 100)
+  private String githubId;
+
+  @Column(name = "avatar_url")
+  private String avatarUrl;
 
   @Column(name = "is_active", nullable = false)
   private boolean active = true;
@@ -87,6 +93,22 @@ public class Employee {
 
   public void setPasswordHash(String hash) {
     this.passwordHash = hash;
+  }
+
+  public String getGithubId() {
+    return githubId;
+  }
+
+  public void setGithubId(String githubId) {
+    this.githubId = githubId;
+  }
+
+  public String getAvatarUrl() {
+    return avatarUrl;
+  }
+
+  public void setAvatarUrl(String avatarUrl) {
+    this.avatarUrl = avatarUrl;
   }
 
   public boolean isActive() {
